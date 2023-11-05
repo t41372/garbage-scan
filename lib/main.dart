@@ -20,8 +20,6 @@ FirebaseFirestore db = FirebaseFirestore.instance;
 void main() async {
 // ...
 
-  // logger.d(await useAI("Purified Water (from barcode.monster)"));
-
   runApp(const MyApp());
   // WidgetsFlutterBinding.ensureInitialized(); // Required for Firebase to work
 
@@ -110,7 +108,8 @@ String parseJson(String responseBody, String propertyName) {
 Future<String> useAI(String _scanResult) async {
   // add the prompt to the AI prompt collection
   final aiPrompt = {
-    "prompt": "How to recycle {{item_to_recycle}}?",
+    "prompt":
+        "How to recycle {{item_to_recycle}} properly? Please only include actionable steps.",
     "item_to_recycle": _scanResult,
     "response": ""
   };
@@ -119,17 +118,18 @@ Future<String> useAI(String _scanResult) async {
       .collection("generate")
       .where("item_to_recycle", isEqualTo: _scanResult)
       .get();
-  while (true) {
-    if (userQuerySnap.docs.isNotEmpty) {
-      DocumentSnapshot? firstDocument = userQuerySnap.docs[0];
+  logger.i("Finished QS now");
+  while (userQuerySnap.docs.isNotEmpty) {
+    DocumentSnapshot? firstDocument = userQuerySnap.docs[0];
 
-      dynamic statusCheck = firstDocument.get('status');
-      if (parseJson(statusCheck, "state") == "COMPLETED") {
-        dynamic response = await firstDocument.get("output");
-        return response;
-      }
+    if (firstDocument.get('status')['state'] == "COMPLETED") {
+      dynamic response = await firstDocument.get("output");
+      logger.i("AI response: $response");
+      return response;
     }
   }
+  logger.i("AI response not found");
+  return "AI response not found";
 }
 
 class MyApp extends StatelessWidget {
