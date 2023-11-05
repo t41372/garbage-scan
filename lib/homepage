@@ -1,0 +1,65 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: HomePage(),
+    );
+  }
+}
+
+class HomePage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Homepage'),
+      ),
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            flex: 1,
+            child: Image.network(
+              'https://www.google.com/url?sa=i&url=https%3A%2F%2F
+              www.grainger.com%2Fknow-how%2Fsafety-health%2Fsustainability%2Fkh-wh
+              at-recycling-symbols-mean&psig=AOvVaw01GfY_Wnylkf5RsGdrT7hL&ust=16992
+              13787588000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCOC7z
+              uOOq4IDFQAAAAAdAAAAABAE', 
+              fit: BoxFit.cover,
+              width: double.infinity,
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  // Your scan function here
+                  print('Scan button pressed');
+                },
+                child: Text('Scan'),
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.blue,
+                  onPrimary: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "44088459127",
+    "project_id": "garbage-scan-2b3a3",
+    "storage_bucket": "garbage-scan-2b3a3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:44088459127:android:1cab51d0b7344cbdbb6b72",
+        "android_client_info": {
+          "package_name": "com.example.garbage_classified"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCz-DhrkBP7M8Dp92anoLTf3DnVRdAwj3k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
