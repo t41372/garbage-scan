@@ -8,8 +8,7 @@ import 'package:logger/logger.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-// import 'package:firebase_core/firebase_core.dart';
-// import 'firebase_options.dart';
+const barcode_api_key = "<<Paste Your go-upc barcode api key here>>";
 
 final logger = Logger(
   printer: PrettyPrinter(),
@@ -86,14 +85,14 @@ Future<void> readDataFromFirestore() async {
   }
 }
 
-String parseJson(String responseBody, String propertyName) {
+String parseJson(String responseBody, String propertyName, String name2) {
   // 使用 json.decode 方法解析 JSON 字符串
   Map<String, dynamic> parsedJson = json.decode(responseBody);
 
   // 假设 JSON 包含键名为 'propertyName' 的属性
   if (parsedJson.containsKey(propertyName)) {
     // 通过键名 'propertyName' 获取属性值
-    dynamic propertyValue = parsedJson[propertyName];
+    dynamic propertyValue = parsedJson[propertyName][name2];
 
     // 打印属性值
     return propertyValue;
@@ -197,13 +196,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // parse the info from the scan result to the info of the item using api
   Future<void> getProductInfo(String barcode) async {
-    final url = Uri.parse('https://barcode.monster/api/$_scanResult');
+    final url = Uri.parse(
+        'https://go-upc.com/api/v1/code/$barcode?key=$barcode_api_key');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
       // Parse and handle the API response here
-      _scanResult = parseJson(response.body, 'description');
-
+      _scanResult = parseJson(response.body, 'product', 'name');
+      logger.i("Product name: $_scanResult");
       final item = {
         "Description": _scanResult,
         "barcode": barcode,
