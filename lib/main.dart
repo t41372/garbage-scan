@@ -192,7 +192,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String _scanResult = '';
   String _devDisplay = "DevDisplay";
   String _currentUserId = "";
-  String _currentName = "Sign in with Google...SLOW";
+  String _currentName = "Sign in with Google...";
   String _aiResponse = "";
 
   // parse the info from the scan result to the info of the item using api
@@ -262,9 +262,20 @@ class _MyHomePageState extends State<MyHomePage> {
     // Define the style for the buttons
     ButtonStyle buttonStyle = ElevatedButton.styleFrom(
       onPrimary: Colors.white, // Text color (white)
-      backgroundColor:
-          Colors.blue.withOpacity(0.7), // Transparent blue background
-      minimumSize: const Size(200, 160), // Minimum size of the button
+      backgroundColor: Color.fromARGB(255, 56, 86, 237)
+          .withOpacity(0.7), // Transparent blue background
+      minimumSize: const Size(100, 60), // Minimum size of the button
+      shape: RoundedRectangleBorder(
+        // Rounded corners
+        borderRadius: BorderRadius.circular(30),
+      ),
+      elevation: 0, // Removes elevation (shadow)
+    );
+    ButtonStyle buttonStyle2 = ElevatedButton.styleFrom(
+      onPrimary: const Color.fromARGB(255, 255, 255, 255), // Text color (white)
+      backgroundColor: Color.fromARGB(255, 118, 134, 216)
+          .withOpacity(0.7), // Transparent blue background
+      fixedSize: const Size(150, 40), // Minimum size of the button
       shape: RoundedRectangleBorder(
         // Rounded corners
         borderRadius: BorderRadius.circular(30),
@@ -274,7 +285,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // Define the style for the button text
     TextStyle buttonTextStyle = const TextStyle(
-      fontSize: 30,
+      fontSize: 15,
       fontWeight: FontWeight.bold,
       color: Colors.white, // Text color (white)
     );
@@ -282,119 +293,119 @@ class _MyHomePageState extends State<MyHomePage> {
     // Define the style for the scan result text
     TextStyle scanResultTextStyle = const TextStyle(
       fontSize: 15,
-      color: Colors.black87,
+      color: Color.fromARGB(221, 255, 255, 255),
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+    return Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: NetworkImage(
+              "https://img.freepik.com/free-photo/abstract-textured-backgound_1258-30456.jpg"), // Replace with your image URL
+          fit: BoxFit.cover, // This will cover the entire background
+        ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0), // Padding around the entire body
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            /*// draw a rounded first picture
-            ClipRRect(
-              borderRadius: BorderRadius.circular(15.0),
-              child: Image.asset(
-//// FIXME, THE link of code;
-                "https://c8.alamy.com/comp/EMC79C/vector-recycle-bin-icon-EMC79C.jpg",
-                width: MediaQuery.of(context).size.width / 2 * 3,
-                height: 400,
-                fit: BoxFit.cover,
+      child: Scaffold(
+        backgroundColor: Color.fromARGB(
+            0, 0, 0, 0), // Scaffold background is now transparent
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: Text(widget.title),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0), // Padding around the entire body
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              ElevatedButton(
+                onPressed: () async {
+                  var barcodeResult = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SimpleBarcodeScannerPage(),
+                    ),
+                  );
+                  if (barcodeResult is String) {
+                    _scanResult = barcodeResult;
+                    await getProductInfo(_scanResult);
+                    // _aiResponse 5= await useAI(_scanResult);
+                    // logger.i("AI response: $_aiResponse");
+                    setState(() {});
+                    // showInfoDialog(_aiResponse);
+                  }
+                },
+                style: buttonStyle, // Use the button style defined above
+                child: Text('Open Scanner', style: buttonTextStyle),
               ),
-            ),
-            const SizedBox(height: 10),*/
+              const SizedBox(height: 10), // Spacing between the buttons
+              // Scan Result Text
+              Text(
+                'The following is the result of the scan:',
+                style: scanResultTextStyle,
+              ),
+              const SizedBox(height: 10), // Spacing between text and result
+              // Scan Result Output
+              Text(
+                _scanResult,
+                style: buttonTextStyle,
+                textAlign: TextAlign.center,
+              ),
 
-            // Scanner Button
-            ElevatedButton(
-              onPressed: () async {
-                var barcodeResult = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const SimpleBarcodeScannerPage(),
-                  ),
-                );
-                if (barcodeResult is String) {
-                  _scanResult = barcodeResult;
-                  await getProductInfo(_scanResult);
-                  // _aiResponse = await useAI(_scanResult);
-                  // logger.i("AI response: $_aiResponse");
-                  setState(() {});
-                  // showInfoDialog(_aiResponse);
-                }
-              },
-              style: buttonStyle, // Use the button style defined above
-              child: Text('Open Scanner', style: buttonTextStyle),
-            ),
-            const SizedBox(height: 10), // Spacing between the buttons
-            // Scan Result Text
-            Text(
-              'The following is the result of the scan:',
-              style: scanResultTextStyle,
-            ),
-            const SizedBox(height: 10), // Spacing between text and result
-            // Scan Result Output
-            Text(
-              _scanResult,
-              style: Theme.of(context).textTheme.headlineMedium,
-              textAlign: TextAlign.center,
-            ),
+              const SizedBox(
+                  height:
+                      20), // Spacing between the scan result and the next button
+              // Ranking Page Button
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => RankingPage()),
+                  );
+                },
 
-            const SizedBox(
-                height:
-                    20), // Spacing between the scan result and the next button
-            // Ranking Page Button
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => RankingPage()),
-                );
-              },
+                style: buttonStyle, // Use the button style defined above
 
-              style: buttonStyle, // Use the button style defined above
-              child: Text('Go to Ranking Page', style: buttonTextStyle),
-            ),
+                child: Text('Go to Ranking Page', style: buttonTextStyle),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                // ! =============== button for sign in with google
+                onPressed: () async {
+                  await signInWithGoogle().then((value) async {
+                    if (value != null) {
+                      _currentUserId = value!.uid;
+                      _currentName = value.displayName ?? "Not login";
 
-            ElevatedButton(
-              // ! =============== button for sign in with google
-              onPressed: () async {
-                await signInWithGoogle().then((value) async {
-                  if (value != null) {
-                    _currentUserId = value!.uid;
-                    _currentName = value.displayName ?? "Not login";
+                      QuerySnapshot querySnapshot = await db
+                          .collection("users")
+                          .where("userId", isEqualTo: _currentUserId)
+                          .get();
 
-                    QuerySnapshot querySnapshot = await db
-                        .collection("users")
-                        .where("userId", isEqualTo: _currentUserId)
-                        .get();
-
-                    if (querySnapshot.size > 0) {
-                      // user exists
-                      // do nothing
+                      if (querySnapshot.size > 0) {
+                        // user exists
+                        // do nothing
+                      } else {
+                        // user does not exist
+                        db.collection("users").add({
+                          "userId": _currentUserId,
+                          "name": _currentName,
+                          "score": 0,
+                        });
+                      }
+                      setState(() {});
                     } else {
-                      // user does not exist
-                      db.collection("users").add({
-                        "userId": _currentUserId,
-                        "name": _currentName,
-                        "score": 0,
+                      setState(() {
+                        _currentName = "Not login";
                       });
                     }
-                    setState(() {});
-                  } else {
-                    setState(() {
-                      _currentName = "Not login";
-                    });
-                  }
-                });
-              },
+                  });
+                },
 
-              child: Text(_currentName),
-            )
-          ],
+                child: Text(_currentName),
+                style: buttonStyle2,
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -440,27 +451,3 @@ class RankingPage extends StatelessWidget {
     );
   }
 }
-
-
-// class MyWidget extends StatefulWidget {
-//   @override
-//   _MyWidgetState createState() => _MyWidgetState();
-// }
-
-// class _MyWidgetState extends State<MyWidget> {
-//   bool _isLoading = false;
-
-//   void _startLoading() {
-//     setState(() {
-//       _isLoading = true; // Start the loading process
-//     });
-//     _performAsyncOperation(); // Simulate an async operation
-//   }
-
-//     Future<void> _performAsyncOperation() async {
-//     // Simulate some async operation (e.g., network call)
-//     await Future.delayed(Duration(seconds: 2));
-//     setState(() {
-//       _isLoading = false; // Stop the loading process
-//     });
-//     }

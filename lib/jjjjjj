@@ -280,7 +280,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
         Scaffold(
-            background color: Colors.transparent,
+            //background color: Colors.transparent,
         appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
