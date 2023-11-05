@@ -17,9 +17,6 @@ final logger = Logger(
 
 FirebaseFirestore db = FirebaseFirestore.instance;
 
-final GoogleSignIn googleSignIn = GoogleSignIn();
-final FirebaseAuth auth = FirebaseAuth.instance;
-
 void main() async {
 // ...
   runApp(const MyApp());
@@ -33,6 +30,9 @@ void main() async {
 }
 
 Future<User?> signInWithGoogle() async {
+  GoogleSignIn googleSignIn = GoogleSignIn();
+  FirebaseAuth auth = FirebaseAuth.instance;
+
   try {
     final GoogleSignInAccount? googleSignInAccount =
         await googleSignIn.signIn();
@@ -48,10 +48,31 @@ Future<User?> signInWithGoogle() async {
           await auth.signInWithCredential(credential);
       return authResult.user;
     }
+    await Firebase.initializeApp();
     return null;
   } catch (e) {
     logger.e("Error signing in with Google: $e");
+    await Firebase.initializeApp();
     return null;
+  }
+}
+
+Future<void> increaseUserScore(String userId) async {
+  try {
+    QuerySnapshot userQuerySnap =
+        await db.collection("users").where("userId", isEqualTo: userId).get();
+    logger.i("User found? ${userQuerySnap.toString()}, userid: $userId");
+
+    if (userQuerySnap.docs.isNotEmpty) {
+      // 获取第一个匹配的文档
+      DocumentSnapshot? firstDocument = userQuerySnap.docs[0];
+
+      dynamic score = firstDocument.get('score');
+      int newScore = score + 1;
+      await firstDocument.reference.update({'score': newScore});
+    }
+  } catch (e) {
+    logger.e("Error incrementing score: $e");
   }
 }
 
@@ -137,6 +158,8 @@ class _MyHomePageState extends State<MyHomePage> {
   // int _counter = 0;
   String _scanResult = '';
   String _devDisplay = "DevDisplay";
+  String _currentUserId = "";
+  String _currentName = "Sign in with Google...SLOW";
 
   // parse the info from the scan result to the info of the item using api
   Future<void> getProductInfo(String barcode) async {
@@ -156,6 +179,8 @@ class _MyHomePageState extends State<MyHomePage> {
         if (!_scanResult.contains("propertyName not found")) {
           db.collection("Trash").add(item);
         }
+
+        increaseUserScore(_currentUserId);
       });
     } else {
       // Handle errors, e.g., if the API call fails
@@ -215,6 +240,19 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            /*// draw a rounded first picture
+            ClipRRect(
+              borderRadius: BorderRadius.circular(15.0),
+              child: Image.asset(
+//// FIXME, THE link of code;
+                "https://c8.alamy.com/comp/EMC79C/vector-recycle-bin-icon-EMC79C.jpg",
+                width: MediaQuery.of(context).size.width / 2 * 3,
+                height: 400,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(height: 10),*/
+
             // Scanner Button
             ElevatedButton(
               onPressed: () async {
@@ -234,7 +272,7 @@ class _MyHomePageState extends State<MyHomePage> {
               style: buttonStyle, // Use the button style defined above
               child: Text('Open Scanner', style: buttonTextStyle),
             ),
-            const SizedBox(height: 20), // Spacing between the buttons
+            const SizedBox(height: 10), // Spacing between the buttons
             // Scan Result Text
             Text(
               'The following is the result of the scan:',
@@ -264,16 +302,38 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
 
             ElevatedButton(
-              // button for sign in with google
+              // ! =============== button for sign in with google
               onPressed: () async {
-                User? user = await signInWithGoogle();
-                if (user != null) {
-                  // User is successfully authenticated.
-                } else {
-                  // Sign-in with Google failed.
-                }
+                await signInWithGoogle().then((value) async {
+                  if (value != null) {
+                    _currentUserId = value!.uid;
+                    _currentName = value.displayName ?? "Not login";
+
+                    QuerySnapshot querySnapshot = await db
+                        .collection("users")
+                        .where("userId", isEqualTo: _currentUserId)
+                        .get();
+
+                    if (querySnapshot.size > 0) {
+                      // user exists
+                      // do nothing
+                    } else {
+                      // user does not exist
+                      db.collection("users").add({
+                        "userId": _currentUserId,
+                        "name": _currentName,
+                        "score": 0,
+                      });
+                    }
+                    setState(() {});
+                  } else {
+                    setState(() {
+                      _currentName = "Not login";
+                    });
+                  }
+                });
               },
-              child: const Text("Sign in with Google"),
+              child: Text(_currentName),
             )
           ],
         ),
@@ -286,12 +346,57 @@ class RankingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ranking Page'),
-      ),
-      body: const Center(
-        child: Text('Content is here'),
+      body: FutureBuilder<QuerySnapshot>(
+        future: FirebaseFirestore.instance.collection("users").get(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator();
+          }
+
+          if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
+          }
+
+          List<int> scores = [];
+
+          if (snapshot.hasData) {
+            for (QueryDocumentSnapshot doc in snapshot.data!.docs) {
+              int score = doc["score"] as int;
+              scores.add(score);
+            }
+          }
+          return SafeArea(
+            child: Column(
+              children: [
+                const Text(
+                  'All Scores:',
+                  style: TextStyle(color: Colors.black, fontSize: 20),
+                ),
+                for (int score in scores) Text(score.toString()),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
+}
+
+Future<void> getProductInfo(String barcode) async {
+  // No need to call setState to set _isLoading here since it's being set in the onPressed method
+
+  final url = Uri.parse('https://barcode.monster/api/$barcode');
+  final response = await http.get(url);
+
+  if (response.statusCode == 200) {
+    // Successfully got the response
+    _scanResult = parseJson(response.body, 'description');
+  } else {
+    _scanResult = 'Failed to get product info';
+  }
+
+  // After getting the response, update the state to reflect changes and stop loading
+  setState(() {
+    _isLoading = false;
+  });
 }
