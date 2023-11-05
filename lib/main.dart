@@ -4,9 +4,17 @@ import 'package:http/http.dart' as http;
 import 'dart:convert'; // 引入 dart:convert 包
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'package:firebase_database/firebase_database.dart';
+
+final databaseReference = FirebaseDatabase.instance.ref();
+
+void writeToDatabase(String key, String value) {
+  databaseReference.child(key).push().set(value);
+}
 
 void main() async {
 // ...
+  WidgetsFlutterBinding.ensureInitialized(); // Required for Firebase to work
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -191,3 +199,39 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
+
+// class FirstPage extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text('First Page'),
+//       ),
+//       body: Center(
+//         child: ElevatedButton(
+//           onPressed: () {
+//             Navigator.push(
+//               context,
+//               MaterialPageRoute(builder: (context) => SecondPage()),
+//             );
+//           },
+//           child: Text('Go to Second Page'),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+// class SecondPage extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text('Second Page'),
+//       ),
+//       body: Center(
+//         child: Text('Ranking'),
+//       ),
+//     );
+//   }
+// }
