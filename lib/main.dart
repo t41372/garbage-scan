@@ -1,25 +1,67 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert'; // 引入 dart:convert 包
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:logger/logger.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
-final databaseReference = FirebaseDatabase.instance.ref();
+// import 'package:firebase_core/firebase_core.dart';
+// import 'firebase_options.dart';
 
-void writeToDatabase(String key, String value) {
-  databaseReference.child(key).push().set(value);
-}
+final logger = Logger(
+  printer: PrettyPrinter(),
+);
+
+FirebaseFirestore db = FirebaseFirestore.instance;
+
+final GoogleSignIn googleSignIn = GoogleSignIn();
+final FirebaseAuth auth = FirebaseAuth.instance;
 
 void main() async {
 // ...
-  WidgetsFlutterBinding.ensureInitialized(); // Required for Firebase to work
-
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
   runApp(const MyApp());
+  // WidgetsFlutterBinding.ensureInitialized(); // Required for Firebase to work
+
+  await Firebase.initializeApp();
+
+  // Add a new document with a generated ID
+//   // db.collection("users").add(user).then((DocumentReference doc) =>
+//   //     logger.i('DocumentSnapshot added with ID: ${doc.id}'));
+}
+
+Future<User?> signInWithGoogle() async {
+  try {
+    final GoogleSignInAccount? googleSignInAccount =
+        await googleSignIn.signIn();
+    if (googleSignInAccount != null) {
+      final GoogleSignInAuthentication googleSignInAuthentication =
+          await googleSignInAccount.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleSignInAuthentication.accessToken,
+        idToken: googleSignInAuthentication.idToken,
+      );
+
+      final UserCredential authResult =
+          await auth.signInWithCredential(credential);
+      return authResult.user;
+    }
+    return null;
+  } catch (e) {
+    logger.e("Error signing in with Google: $e");
+    return null;
+  }
+}
+
+Future<void> readDataFromFirestore() async {
+  FirebaseFirestore db = FirebaseFirestore.instance;
+  QuerySnapshot querySnapshot = await db.collection("users").get();
+  for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+    logger.i("User ID: ${doc.id}");
+    logger.i("User Data: ${doc.data()}");
+  }
 }
 
 String parseJson(String responseBody, String propertyName) {
@@ -94,6 +136,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   // int _counter = 0;
   String _scanResult = '';
+  String _devDisplay = "DevDisplay";
 
   // parse the info from the scan result to the info of the item using api
   Future<void> getProductInfo(String barcode) async {
@@ -104,6 +147,15 @@ class _MyHomePageState extends State<MyHomePage> {
       // Parse and handle the API response here
       setState(() {
         _scanResult = parseJson(response.body, 'description');
+
+        final item = {
+          "Description": _scanResult,
+          "barcode": barcode,
+        };
+
+        if (!_scanResult.contains("propertyName not found")) {
+          db.collection("Trash").add(item);
+        }
       });
     } else {
       // Handle errors, e.g., if the API call fails
@@ -127,111 +179,119 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    // Define the style for the buttons
+    ButtonStyle buttonStyle = ElevatedButton.styleFrom(
+      onPrimary: Colors.white, // Text color (white)
+      backgroundColor:
+          Colors.blue.withOpacity(0.7), // Transparent blue background
+      minimumSize: const Size(200, 160), // Minimum size of the button
+      shape: RoundedRectangleBorder(
+        // Rounded corners
+        borderRadius: BorderRadius.circular(30),
+      ),
+      elevation: 0, // Removes elevation (shadow)
+    );
+
+    // Define the style for the button text
+    TextStyle buttonTextStyle = const TextStyle(
+      fontSize: 30,
+      fontWeight: FontWeight.bold,
+      color: Colors.white, // Text color (white)
+    );
+
+    // Define the style for the scan result text
+    TextStyle scanResultTextStyle = const TextStyle(
+      fontSize: 15,
+      color: Colors.black87,
+    );
+
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
+      body: Padding(
+        padding: const EdgeInsets.all(16.0), // Padding around the entire body
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            // Scanner Button
             ElevatedButton(
-              //The camera elavated button
               onPressed: () async {
                 var barcodeResult = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SimpleBarcodeScannerPage(),
-                    ));
-                setState(() {
-                  if (barcodeResult is String) {
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SimpleBarcodeScannerPage(),
+                  ),
+                );
+                if (barcodeResult is String) {
+                  setState(() {
                     _scanResult = barcodeResult;
-                    // barcode is sent to api, and the result will be updated
                     getProductInfo(_scanResult);
-                  }
-                });
+                  });
+                }
               },
-              child: const Text('Open Scanner'),
+              style: buttonStyle, // Use the button style defined above
+              child: Text('Open Scanner', style: buttonTextStyle),
             ),
-            const Text(
-              'The following is the result of the scan',
+            const SizedBox(height: 20), // Spacing between the buttons
+            // Scan Result Text
+            Text(
+              'The following is the result of the scan:',
+              style: scanResultTextStyle,
             ),
+            const SizedBox(height: 10), // Spacing between text and result
+            // Scan Result Output
             Text(
               _scanResult,
               style: Theme.of(context).textTheme.headlineMedium,
+              textAlign: TextAlign.center,
             ),
+            const SizedBox(
+                height:
+                    20), // Spacing between the scan result and the next button
+            // Ranking Page Button
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => RankingPage()),
+                );
+              },
+
+              style: buttonStyle, // Use the button style defined above
+              child: Text('Go to Ranking Page', style: buttonTextStyle),
+            ),
+
+            ElevatedButton(
+              // button for sign in with google
+              onPressed: () async {
+                User? user = await signInWithGoogle();
+                if (user != null) {
+                  // User is successfully authenticated.
+                } else {
+                  // Sign-in with Google failed.
+                }
+              },
+              child: const Text("Sign in with Google"),
+            )
           ],
         ),
       ),
-
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
 
-// class FirstPage extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('First Page'),
-//       ),
-//       body: Center(
-//         child: ElevatedButton(
-//           onPressed: () {
-//             Navigator.push(
-//               context,
-//               MaterialPageRoute(builder: (context) => SecondPage()),
-//             );
-//           },
-//           child: Text('Go to Second Page'),
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-// class SecondPage extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Second Page'),
-//       ),
-//       body: Center(
-//         child: Text('Ranking'),
-//       ),
-//     );
-//   }
-// }
+class RankingPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Ranking Page'),
+      ),
+      body: const Center(
+        child: Text('Content is here'),
+      ),
+    );
+  }
+}
