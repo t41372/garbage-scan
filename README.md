@@ -1,12 +1,7 @@
 # garbage_classified
-
-A new Flutter project.
+A flutter app.
+You can the barcode of your garbage, and we tell you how to recycle it.
 
 ## Getting Started
 
-Create a `.env` file in the directery, and paste the following contents.
-
-
-~~~ text
-OPENAI_AI_API_KEY = os.environ.get('OPENAI_AI_API_KEY')
-~~~
+Please get a barcode interpretation api key from https://go-upc.com and paste it in `lib/main.dart`
