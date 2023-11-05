@@ -19,9 +19,6 @@ FirebaseFirestore db = FirebaseFirestore.instance;
 
 void main() async {
 // ...
-
-  // logger.d(await useAI("Purified Water (from barcode.monster)"));
-
   runApp(const MyApp());
   // WidgetsFlutterBinding.ensureInitialized(); // Required for Firebase to work
 
@@ -107,31 +104,6 @@ String parseJson(String responseBody, String propertyName) {
   }
 }
 
-Future<String> useAI(String _scanResult) async {
-  // add the prompt to the AI prompt collection
-  final aiPrompt = {
-    "prompt": "How to recycle {{item_to_recycle}}?",
-    "item_to_recycle": _scanResult,
-    "response": ""
-  };
-  db.collection("generate").add(aiPrompt);
-  QuerySnapshot userQuerySnap = await db
-      .collection("generate")
-      .where("item_to_recycle", isEqualTo: _scanResult)
-      .get();
-  while (true) {
-    if (userQuerySnap.docs.isNotEmpty) {
-      DocumentSnapshot? firstDocument = userQuerySnap.docs[0];
-
-      dynamic statusCheck = firstDocument.get('status');
-      if (parseJson(statusCheck, "state") == "COMPLETED") {
-        dynamic response = await firstDocument.get("output");
-        return response;
-      }
-    }
-  }
-}
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -185,59 +157,78 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   // int _counter = 0;
   String _scanResult = '';
+  bool _isLoading = false;
   String _devDisplay = "DevDisplay";
   String _currentUserId = "";
   String _currentName = "Sign in with Google...SLOW";
-  String _aiResponse = "";
 
   // parse the info from the scan result to the info of the item using api
+   Future<void> _initiateScan() async {
+    setState(() {
+      _isLoading = true; // Start the loading indicator
+    });
+
+    var barcodeResult = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const SimpleBarcodeScannerPage(),
+      ),
+    );
+
+    if (barcodeResult is String) {
+      await getProductInfo(barcodeResult);
+    } else {
+      setState(() {
+        _isLoading = false; // Stop the loading indicator if no result is obtained
+      });
+    }
+  }
+    // Update this existing method to manage the loading state properly
+  Future<void> getProductInfo(String barcode) async {
+    // No need to set _isLoading to true here, it's already set in _initiateScan
+
+    final url = Uri.parse('https://barcode.monster/api/$barcode');
+    final response = await http.get(url);
+
+    // Parse and handle the API response here
+    if (response.statusCode == 200) {
+      setState(() {
+        _scanResult = parseJson(response.body, 'description');
+        _isLoading = false; // Stop the loading indicator
+      });
+    } else {
+      setState(() {
+        _scanResult = 'Failed to get product info';
+        _isLoading = false; // Stop the loading indicator even if there's an error
+      });
+    }
+  }
   Future<void> getProductInfo(String barcode) async {
     final url = Uri.parse('https://barcode.monster/api/$_scanResult');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
       // Parse and handle the API response here
-      _scanResult = parseJson(response.body, 'description');
-
-      final item = {
-        "Description": _scanResult,
-        "barcode": barcode,
-      };
-
-      if (!_scanResult.contains("propertyName not found")) {
-        db.collection("Trash").add(item);
-        _aiResponse = await useAI(_scanResult);
-        showInfoDialog(_aiResponse);
-      }
       setState(() {
+        _scanResult = parseJson(response.body, 'description');
+
+        final item = {
+          "Description": _scanResult,
+          "barcode": barcode,
+        };
+
+        if (!_scanResult.contains("propertyName not found")) {
+          db.collection("Trash").add(item);
+        }
+
         increaseUserScore(_currentUserId);
       });
     } else {
       // Handle errors, e.g., if the API call fails
       setState(() {
-        _scanResult = 'Failed to get product info.';
+        _scanResult = 'Failed to get product info. Fuck you';
       });
     }
-  }
-
-  void showInfoDialog(String response) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("Response Dialog"),
-          content: Text(response),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text("OK"),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   void _incrementCounter() {
@@ -266,7 +257,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       elevation: 0, // Removes elevation (shadow)
     );
-
+     
     // Define the style for the button text
     TextStyle buttonTextStyle = const TextStyle(
       fontSize: 30,
@@ -287,8 +278,10 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0), // Padding around the entire body
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: _isLoading
+            ? Center(child: CircularProgressIndicator()) // Show the loader if _isLoading is true
+            : Column(
+            mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             /*// draw a rounded first picture
             ClipRRect(
@@ -313,12 +306,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 );
                 if (barcodeResult is String) {
-                  _scanResult = barcodeResult;
-                  await getProductInfo(_scanResult);
-                  // _aiResponse = await useAI(_scanResult);
-                  // logger.i("AI response: $_aiResponse");
-                  setState(() {});
-                  // showInfoDialog(_aiResponse);
+                  setState(() {
+                    _scanResult = barcodeResult;
+                    getProductInfo(_scanResult);
+                  });
                 }
               },
               style: buttonStyle, // Use the button style defined above
@@ -337,7 +328,6 @@ class _MyHomePageState extends State<MyHomePage> {
               style: Theme.of(context).textTheme.headlineMedium,
               textAlign: TextAlign.center,
             ),
-
             const SizedBox(
                 height:
                     20), // Spacing between the scan result and the next button
@@ -386,7 +376,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   }
                 });
               },
-
               child: Text(_currentName),
             )
           ],
@@ -436,26 +425,43 @@ class RankingPage extends StatelessWidget {
   }
 }
 
+class MyWidget extends StatefulWidget {
+  @override
+  _MyWidgetState createState() => _MyWidgetState();
+}
 
-// class MyWidget extends StatefulWidget {
-//   @override
-//   _MyWidgetState createState() => _MyWidgetState();
-// }
+class _MyWidgetState extends State<MyWidget> {
+  bool _isLoading = false;
 
-// class _MyWidgetState extends State<MyWidget> {
-//   bool _isLoading = false;
+  void _startLoading() {
+    setState(() {
+      _isLoading = true; // Start the loading process
+    });
+    _performAsyncOperation(); // Simulate an async operation
+  }
 
-//   void _startLoading() {
-//     setState(() {
-//       _isLoading = true; // Start the loading process
-//     });
-//     _performAsyncOperation(); // Simulate an async operation
-//   }
+    Future<void> _performAsyncOperation() async {
+    // Simulate some async operation (e.g., network call)
+    await Future.delayed(Duration(seconds: 2));
+    setState(() {
+      _isLoading = false; // Stop the loading process
+    });
+  }
 
-//     Future<void> _performAsyncOperation() async {
-//     // Simulate some async operation (e.g., network call)
-//     await Future.delayed(Duration(seconds: 2));
-//     setState(() {
-//       _isLoading = false; // Stop the loading process
-//     });
-//     }
+
+
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Progress Indicator Example')),
+      body: Center(
+        child: _isLoading
+            ? CircularProgressIndicator() // Show progress indicator
+            : ElevatedButton(
+                onPressed: _startLoading, // Start the operation when pressed
+                child: Text('Start Operation'),
+              ),
+      ),
+    );
