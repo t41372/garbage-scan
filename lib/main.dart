@@ -119,13 +119,18 @@ Future<String> useAI(String _scanResult) async {
       .where("item_to_recycle", isEqualTo: _scanResult)
       .get();
   logger.i("Finished QS now");
+
   while (userQuerySnap.docs.isNotEmpty) {
     DocumentSnapshot? firstDocument = userQuerySnap.docs[0];
-
-    if (firstDocument.get('status')['state'] == "COMPLETED") {
+    logger.i("First document: ${firstDocument.get('status')}");
+    logger.i("First document: ${firstDocument.get('status')['state']}");
+    if (await firstDocument.get('status')['state'] == "COMPLETED") {
       dynamic response = await firstDocument.get("output");
       logger.i("AI response: $response");
       return response;
+    } else {
+      // sleep
+      await Future.delayed(Duration(seconds: 1));
     }
   }
   logger.i("AI response not found");

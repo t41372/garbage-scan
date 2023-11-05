@@ -245,6 +245,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+
     // Define the style for the buttons
     ButtonStyle buttonStyle = ElevatedButton.styleFrom(
       onPrimary: Colors.white, // Text color (white)
@@ -271,8 +272,16 @@ class _MyHomePageState extends State<MyHomePage> {
       color: Colors.black87,
     );
 
-    return Scaffold(
-      appBar: AppBar(
+    return  container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("https://wallpapers.com/images/hd/plain-black-background-ozgsjzlrpwaioxps.jpg"),
+            fit: BoxFit.cover,
+          ),
+        ),
+        Scaffold(
+            background color: Colors.transparent,
+        appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
@@ -283,19 +292,6 @@ class _MyHomePageState extends State<MyHomePage> {
             : Column(
             mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            /*// draw a rounded first picture
-            ClipRRect(
-              borderRadius: BorderRadius.circular(15.0),
-              child: Image.asset(
-//// FIXME, THE link of code;
-                "https://c8.alamy.com/comp/EMC79C/vector-recycle-bin-icon-EMC79C.jpg",
-                width: MediaQuery.of(context).size.width / 2 * 3,
-                height: 400,
-                fit: BoxFit.cover,
-              ),
-            ),
-            const SizedBox(height: 10),*/
-
             // Scanner Button
             ElevatedButton(
               onPressed: () async {
@@ -381,8 +377,9 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
+    ),
     );
-  }
+  
 }
 
 class RankingPage extends StatelessWidget {
@@ -418,11 +415,11 @@ class RankingPage extends StatelessWidget {
                 for (int score in scores) Text(score.toString()),
               ],
             ),
-          );
-        },
+          ),
+        }
       ),
-    );
-  }
+      ),
+  };
 }
 
 class MyWidget extends StatefulWidget {
