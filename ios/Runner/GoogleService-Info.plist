@@ -2,18 +2,24 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CLIENT_ID</key>
+	<string>1026502954141-l4v6ip8mjhk3pg1mi3kpk4tlhbsbtqcq.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.1026502954141-l4v6ip8mjhk3pg1mi3kpk4tlhbsbtqcq</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>1026502954141-be57l2et3rvcknipj47fa86gl4fm3t49.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
-	<string>AIzaSyB4CDkvj34G21xiut6NN98-prpX4NOOSWU</string>
+	<string>AIzaSyDcXJuMrfPU4EijlBGzvduLtDrJL3hvDt4</string>
 	<key>GCM_SENDER_ID</key>
-	<string>44088459127</string>
+	<string>1026502954141</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>com.example.garbageClassified</string>
 	<key>PROJECT_ID</key>
-	<string>garbage-scan-2b3a3</string>
+	<string>garbage-scan-e8e02</string>
 	<key>STORAGE_BUCKET</key>
-	<string>garbage-scan-2b3a3.appspot.com</string>
+	<string>garbage-scan-e8e02.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:44088459127:ios:e662a0f52c36e40abb6b72</string>
+	<string>1:1026502954141:ios:efec1be448db264b931874</string>
 </dict>
 </plist>

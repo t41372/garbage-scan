@@ -8,7 +8,10 @@ import 'package:logger/logger.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-const barcode_api_key = "<<Paste Your go-upc barcode api key here>>";
+import 'firebase_options.dart';
+
+const barcode_api_key =
+    "a29a40131b728b5af7c18276e8c11934d06daac25bce6475c4d12c83850d55dd";
 
 final logger = Logger(
   printer: PrettyPrinter(),
@@ -18,11 +21,13 @@ FirebaseFirestore db = FirebaseFirestore.instance;
 
 void main() async {
 // ...
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(const MyApp());
-  // WidgetsFlutterBinding.ensureInitialized(); // Required for Firebase to work
 
-  await Firebase.initializeApp();
+  // WidgetsFlutterBinding.ensureInitialized(); // Required for Firebase to work
 
   // Add a new document with a generated ID
 //   // db.collection("users").add(user).then((DocumentReference doc) =>

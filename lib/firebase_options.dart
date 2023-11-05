@@ -67,8 +67,10 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1026502954141',
     projectId: 'garbage-scan-e8e02',
     storageBucket: 'garbage-scan-e8e02.appspot.com',
-    androidClientId: '1026502954141-be57l2et3rvcknipj47fa86gl4fm3t49.apps.googleusercontent.com',
-    iosClientId: '1026502954141-l4v6ip8mjhk3pg1mi3kpk4tlhbsbtqcq.apps.googleusercontent.com',
+    androidClientId:
+        '1026502954141-be57l2et3rvcknipj47fa86gl4fm3t49.apps.googleusercontent.com',
+    iosClientId:
+        '1026502954141-l4v6ip8mjhk3pg1mi3kpk4tlhbsbtqcq.apps.googleusercontent.com',
     iosBundleId: 'com.example.garbageClassified',
   );
 
@@ -78,8 +80,10 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1026502954141',
     projectId: 'garbage-scan-e8e02',
     storageBucket: 'garbage-scan-e8e02.appspot.com',
-    androidClientId: '1026502954141-be57l2et3rvcknipj47fa86gl4fm3t49.apps.googleusercontent.com',
-    iosClientId: '1026502954141-uqb9ve45ijkbbqlkhvrttih2ubgpabf6.apps.googleusercontent.com',
+    androidClientId:
+        '1026502954141-be57l2et3rvcknipj47fa86gl4fm3t49.apps.googleusercontent.com',
+    iosClientId:
+        '1026502954141-uqb9ve45ijkbbqlkhvrttih2ubgpabf6.apps.googleusercontent.com',
     iosBundleId: 'com.example.garbageClassified.RunnerTests',
   );
 }
