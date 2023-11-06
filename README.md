@@ -1,5 +1,5 @@
 # garbage_scan
-A flutter application designed to provide garbage recycling guidance for everyone.
+A flutter application designed to provide garbage recycling guidance for everyone. Built with flutter and Firebase (firestore and firebase ai extension).
 
 You scan the barcode of your garbage, and we (either our database or Google Bard) will tell you how to recycle it.
 
