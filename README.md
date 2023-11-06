@@ -3,9 +3,14 @@ A flutter application designed to provide garbage recycling guidance for everyon
 
 You scan the barcode of your garbage, and we (either our database or Google Bard) will tell you how to recycle it.
 
-This project was created in SunHacks 2023 within 24 hours by [@t41372](https://github.com/t41372), [@laowang0991](https://github.com/laowang0991), and [@czkcool](https://github.com/czkcool). More information on our [Devpost page](https://devpost.com/software/garbage_scan?ref_content=my-projects-tab&ref_feature=my_projects). This project won the Best Hack for Social Good and Best Sustainability award in SunHacks 2023
+This project was created in SunHacks 2023 within 24 hours by [@t41372](https://github.com/t41372), [@laowang0991](https://github.com/laowang0991), and [@czkcool](https://github.com/czkcool). More information on our [Devpost page](https://devpost.com/software/garbage_scan). This project won the Best Hack for Social Good and Best Sustainability award in SunHacks 2023
 
 This application is targeted at Android, but thanks to the help from the judges and volunteers at SunHacks 2023, this app should also work on IOS. Some packages may break on the web version.
+
+<img width="200" alt="demo1" src="https://github.com/t41372/garbage-scan/assets/36402030/f26b4cd7-e05c-4675-9bd9-2ec3c51e6804">
+<img width="200" alt="demo2" src="https://github.com/t41372/garbage-scan/assets/36402030/8b3e374e-5442-4462-b479-85de4a7d74f8">
+<img width="200" alt="demo3" src="https://github.com/t41372/garbage-scan/assets/36402030/4d8f9e46-c0c8-4ac5-8529-bd25a3ac8c00">
+
 
 ## Demonstration Video
 [![Garbage Scan Demonstration](https://img.youtube.com/vi/SaOiH9RFZac/0.jpg)](https://www.youtube.com/watch?v=SaOiH9RFZac)
